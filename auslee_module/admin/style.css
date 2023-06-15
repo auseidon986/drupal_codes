@@ -1,0 +1,341 @@
+/*
+ * Styles for Admin Panel
+ */
+
+:root {
+  --block_head_bg:  #3c1952;
+  --block_head_color: #ffffff;
+  --block_hover_bg:  #f3f3f3;
+  --th_bg: #d2d2d2;
+}
+
+.display--none {
+  display: none !important;
+}
+
+.field--widget-paragraphs th {
+  background: var(--th_bg);
+}
+
+.field--widget-paragraphs tr:hover, .field--widget-paragraphs tr:focus {
+  background: var(--block_hover_bg);
+}
+
+.field--type-entity-reference-revisions:not(.field--name-field-idfive-paragraph) {
+  border: solid 2px #999;
+  padding: 20px;
+}
+
+.js .field--type-entity-reference-revisions .paragraph-type-title {
+  font-weight: bold;
+  font-size: 20px;
+  flex-basis: calc(100% - 100px);
+}
+
+.field--type-entity-reference-revisions .paragraph-type-top, .paragraph-top {
+  align-items: center;
+  background: var(--block_head_bg);
+  color: var(--block_head_color);
+  font-weight: bold;
+  padding: 0px 20px;
+  grid-template-columns: auto auto 1fr auto !important;
+}
+
+.field--widget-entity-reference-paragraphs .field-multiple-table,
+.field--widget-entity-reference-paragraphs .field-multiple-table th,
+.field--widget-entity-reference-paragraphs .field-multiple-table td {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+}
+
+.js .field--widget-entity-reference-paragraphs .field-multiple-table td {
+  padding: 20px;
+}
+
+.js .field--widget-entity-reference-paragraphs .field-multiple-table td.field-multiple-drag {
+  padding: 0;
+}
+.js .field--widget-entity-reference-paragraphs .field-multiple-table td .tabledrag-handle {
+  display: table-cell !important;
+}
+.js .field--widget-entity-reference-paragraphs .field-multiple-table td .tabledrag-handle::after {
+  margin-left: 0px;
+  padding: 0 5px;
+  width: 20px;
+}
+
+.js .field--widget-entity-reference-paragraphs .field-multiple-table td.delta-order {
+  padding: 0;
+  text-align: center;
+  width: 0;
+}
+
+.filter-wrapper {
+  margin-left: 40px;
+}
+.form-type--textfield + .filter-wrapper {
+  display: none;
+}
+
+.filter-guidelines {
+  /* height: 38px; */
+  position: relative;
+}
+
+.filter-guidelines .filter-guidelines-item, .form-item__description {
+  border: dotted 2px #ccc;
+  max-height: 50px;
+  /* opacity: 0.4; */
+  overflow: auto;
+  padding: 4px 10px;
+  transition: opacity 0.1s linear;
+}
+
+.field-multiple-table td {
+  position: relative;
+}
+
+.filter-guidelines:hover .filter-guidelines-item, .form-item__description:hover {
+
+  /* height: 60px;
+  overflow-y: auto; */
+
+  /* height: auto;
+  position: absolute;
+  background: #ffff;
+  z-index: 1;
+
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  opacity: 1; */
+
+  /* position: absolute;
+  width: 100%;
+  z-index: 10; */
+}
+
+.entities-list.entity-type--media .item-container {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+}
+.entities-list.entity-type--media .item-container .button {
+  margin: 0;
+  flex: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.layout-region--node-secondary,
+.layout-region--node-main,
+.layout-region--node-footer {
+  float: none !important;
+  width: 100% !important;
+  padding: 0 100px !important;
+}
+
+.layout-region--node-main .layout-region__content,
+.layout-region--node-footer .layout-region__content {
+  margin: 0 !important;
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+.vertical-tabs__menu-link:focus::after {
+  border-color: #d9dff2 !important;
+}
+
+.fieldset.fieldset_ip_pro_tips {
+  background: #c8c7f8;
+  border: none;
+  display: inline-block;
+  margin-bottom: 0;
+  margin-top: 0;
+}
+.fieldset_ip_pro_tips .fieldset__legend { display: none; }
+.fieldset_ip_pro_tips .fieldset__wrapper { margin: 10px !important; }
+
+.js .claro-details__wrapper--vertical-tabs-item::before {
+  display: inline !important;
+}
+.js .vertical-tabs .vertical-tabs__item {
+  overflow: visible !important;
+}
+
+
+.group-navigator-full-name .fieldset__wrapper {
+  display: flex;
+  column-gap: 2%;
+  flex-direction: column;
+}
+
+.group-navigator-full-name .fieldset__wrapper .form-wrapper {
+
+}
+
+.group-navigator-full-name .fieldset__wrapper .form-wrapper .form-item {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.group-navigator-full-name .fieldset__wrapper .form-wrapper .form-element {
+  width: 100%;
+}
+
+@media screen and (min-width:1000px) {
+  .group-navigator-full-name .fieldset__wrapper {
+    flex-direction: row;
+  }
+
+  .group-navigator-full-name .fieldset__wrapper .form-wrapper {
+    flex: 0 0 36%;
+    width: 36%;
+  }
+
+  .group-navigator-full-name .fieldset__wrapper .form-wrapper.field--name-field-navigator-middle-name {
+    flex: 0 0 24%;
+    width: 24%;
+  }
+}
+
+.field--name-field-navigator-languages .form-checkboxes {
+  display: grid;
+  grid-template-columns: auto;
+}
+@media screen and (min-width:1000px) {
+  .field--name-field-navigator-languages .form-checkboxes {
+    display: grid;
+    grid-template-columns: auto auto auto;
+  }
+}
+
+.field--name-field-carroll-home-quick-links .paragraphs-subform,
+.field--name-field-carroll-home-hero-links .paragraphs-subform {
+  display: flex;
+  flex-direction: column;
+}
+.field--name-field-carroll-home-hero-links .paragraphs-subform {
+  column-gap: 20px;
+}
+@media screen and (min-width:1310px) {
+  .field--name-field-carroll-home-quick-links .paragraphs-subform,
+  .field--name-field-carroll-home-hero-links .paragraphs-subform {
+    flex-direction: row;
+  }
+}
+
+.fieldset.group_ip_icon_link_icon_selector {
+  min-width: 300px;
+}
+.field--name-field-carroll-home-quick-links .paragraphs-subform .field--name-field-ip-icon-link-icon,
+.field--name-field-carroll-home-quick-links .paragraphs-subform .field--name-field-ip-icon-link-item {
+  display: flex;
+}
+.field--name-field-carroll-home-quick-links .paragraphs-subform .field--name-field-ip-icon-link-icon .js-media-library-item {
+  width: auto;
+}
+
+.ip_video_options .fieldset__wrapper {
+  display: flex;
+  gap: 20px;
+}
+.ip_video_options legend .fieldset__label {
+  display: none;
+}
+.ip_video_options legend::after {
+  content: "";
+  display: block;
+  height: 20px;
+}
+
+.fieldgroup_row > .fieldset__wrapper,
+.fieldgroup_row > .details-wrapper {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+}
+
+.fieldgroup_row.align-top > .fieldset__wrapper,
+.fieldgroup_row.align-top > .details-wrapper {
+  align-items: flex-start;
+}
+
+.fieldgroup_row.stretch > .fieldset__wrapper,
+.fieldgroup_row.stretch > .details-wrapper {
+  align-items: stretch;
+}
+
+.fieldgroup_row.full > .fieldset__wrapper > *,
+.fieldgroup_row.full > .details-wrapper > * {
+  flex: 1;
+  overflow: hidden;
+}
+
+.fieldgroup_row .media-library-selection .media-library-item--grid {
+  width: 100%;
+}
+
+.fieldgroup_unseen {
+  box-shadow: none !important;
+  border: none !important;
+  margin-block: 0 !important;
+}
+
+.fieldgroup_unseen > legend {
+  display: none !important;
+}
+
+.fieldgroup_unseen > .fieldset__wrapper,
+.fieldgroup_unseen > .details-wrapper {
+  margin: 0 !important;
+}
+
+.fieldgroup_unseen > .fieldset__wrapper > .js-form-wrapper:first-child,
+.fieldgroup_unseen > .details-wrapper > .js-form-wrapper:first-child {
+
+}
+
+.field--name-field-department .fieldset--group .form-boolean-group,
+.field--name-field-academic-program .fieldset--group .form-boolean-group,
+.field--name-field-resource-type .fieldset--group .form-boolean-group,
+.field--name-field-academic-school .fieldset--group .form-boolean-group {
+  column-count: 4;
+  column-rule: solid 1px #ccc;
+}
+
+.field--name-field-academic-year .fieldset--group .form-boolean-group,
+.field--name-field-calendar-type .fieldset--group .form-boolean-group,
+.field--name-field-degree .fieldset--group .form-boolean-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0px 20px;
+}
+
+.field--name-field-employee-type > .form-item {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.page-node-type-homepage .hide--homepage {
+  display: none;
+}
+
+.form-item--field-campus-venues {
+  padding-right: 30px;
+  position: relative;
+}
+.form-item--field-campus-venues .ajax-progress {
+  position: absolute;
+  bottom: 20px;
+}
+
+.field--name-field-event-date.field--type-daterange > fieldset > legend {
+  display: none;
+}
+.field--name-field-event-date.field--type-daterange > fieldset > .fieldset__wrapper {
+  display: flex;
+  gap: 0 40px;
+  flex-wrap: wrap;
+}

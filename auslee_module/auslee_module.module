@@ -1,0 +1,486 @@
+<?php
+
+/**
+ * @file
+ * auslee_module module file.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Symfony\Component\Validator\Constraints\Length;
+
+use function PHPUnit\Framework\isEmpty;
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Admin panel specific style/js file importing process.
+ */
+function auslee_module_page_attachments(array &$attachments) {
+  if (\Drupal::service('router.admin_context')->isAdminRoute()) {
+    $attachments['#attached']['library'][] = 'auslee_module/admin';
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ *
+ * For every paragraph, attach parent field name and parent entity type name.
+ */
+function auslee_module_preprocess_paragraph(&$variables) {
+
+  $paragraph = $variables['paragraph'];
+  $parentFieldName = $paragraph->get('parent_field_name')->value;
+  $variables['_parent_field'] = $parentFieldName;
+
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node) {
+    $variables['_node'] = $node;
+  }
+
+  $pageType = auslee_module_get_node_type_id();
+  $variables['_page_type'] = $pageType;
+
+  $parentEntity = $paragraph->getParentEntity();
+  if ($parentEntity) {
+    if ($parentEntity instanceof Drupal\paragraphs\Entity\Paragraph) {
+
+      $parentType = $parentEntity->getType();
+      $variables['_parent_type'] = $parentType;
+    }
+  }
+
+
+}
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function auslee_module_views_pre_view($view, $display_id, array &$args) {
+
+  $params = \Drupal::request()->query->all();
+  $specificParams = [];
+
+  $node = \Drupal::routeMatch()->getParameter('node');
+  $viewId = $view->storage->id();
+
+  if ($viewId == 'carroll_recent_news') {
+    //
+  }
+
+}
+
+/**
+ * Remove N/A option for select list.
+ */
+function auslee_module_options_list_alter(array &$options, array $context) {
+
+}
+
+/**
+ * Implements hook_field_widget_entity_reference_paragraphs_form_alter().
+ */
+function auslee_module_field_widget_entity_reference_paragraphs_form_alter(&$element, &$form_state, $context) {
+  // auslee_module_show_paragraph_id($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_paragraphs_form_alter().
+ */
+function auslee_module_field_widget_paragraphs_form_alter(&$element, &$form_state, $context) {
+  auslee_module_show_paragraph_id($element, $form_state, $context);
+}
+
+/**
+ * Showing HTML Element Selector of each paragraph in admin panel.
+ */
+function auslee_module_show_paragraph_id(&$element, &$form_state, $context) {
+  auslee_module_display_paragraph_id($element, $form_state, $context);
+}
+
+/**
+ * Core function to show HTML Element Selector of each paragraph in admin panel.
+ */
+function auslee_module_display_paragraph_id (&$element, &$form_state, $context) {
+  return;
+
+  $paraId = '';
+  $fieldType = $element['#paragraph_type'];
+
+  $allowedParagraphs = [
+    '',
+  ];
+
+  $currentTheme = \Drupal::config('system.theme')->get('default');
+  if ($currentTheme == 'carroll') {
+    $allowedParagraphs[] = 'ip_blockquote';
+  }
+
+  if (!in_array($fieldType, $allowedParagraphs)) return;
+
+
+  $itemInfo = $context['items'][$context['delta']]->getValue();
+  if (isset($itemInfo['target_id'])) {
+    $paraId = $itemInfo['target_id'];
+  }
+
+  if ($paraId == '') {
+    $paraId = '<strong><i> N/A (please save your changes first.)</i></strong>';
+  } else {
+    $paraId = '<strong>#ip_paragraph_adv-' . $paraId . '</strong>';
+  }
+
+  $markup = <<<Markup
+  <i>Selector:</i> {$paraId}
+Markup;
+
+  if (isset($element[$fieldType . '_pro_tips'])) {
+    $element[$fieldType . 'pro_tips']['#markup'] = $markup . '<br/>' . $element[$fieldType . '_tips']['#markup'];
+  } else {
+    $element[$fieldType . '_pro_tips'] = [
+      '#type' => 'fieldset',
+      '#title' => t(''),
+      '#weight' => -1100,
+      "#attributes" => [
+        "class" => [
+          'fieldset_ip_pro_tips'
+        ],
+      ],
+      '#markup' => $markup,
+    ];
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function auslee_module_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  // Remove preview from all
+  $form['actions']['preview']['#access'] = FALSE;
+
+  if (preg_match('/node_/', $form_id)) {
+    if (isset($form['promote'])) {
+      unset($form['promote']);
+    }
+    if (isset($form['sticky'])) {
+      unset($form['sticky']);
+    }
+  }
+
+  if (preg_match('/node_homepage_/', $form_id)) {
+    $selector = '[name="field_homepage_reminder_onoff[value]"]';
+    $subs = ['field_homepage_reminder_title', 'field_homepage_reminder_text', 'field_homepage_reminder_link'];
+    foreach ($subs as $sub) {
+      $form[$sub]['#states'] = [
+        'visible' => [
+          $selector => ['checked' => TRUE],
+        ],
+      ];
+    }
+  } elseif (preg_match('/node_person_/', $form_id)) {
+
+    $person_selector = '[name="field_person_type"]';
+    $employee_selector = '[name="field_employee_type"]';
+    $student_selector = '[name="field_student_or_alumni"]';
+
+    $visible_mapper = [
+      ['field_cabinet_member', [$person_selector => ['value' => 0]]],
+      ['field_department', [$person_selector => ['value' => 0]]],
+      ['field_department_chair', [
+        $person_selector => ['value' => 0],
+        'and',
+        $employee_selector => ['value' => 'faculty']
+      ]],
+      ['field_employee_type', [$person_selector => ['value' => 0]]],
+      // ['field_first_name', [$person_selector => ['value' => 0]]],
+      // ['field_last_name', [$person_selector => ['value' => 0]]],
+      ['field_job_title', [
+        [
+          $person_selector => ['value' => 0],
+        ],
+        'or',
+        [
+          $person_selector => ['value' => 1],
+          'and',
+          $student_selector => ['value' => 1],
+        ],
+      ]],
+      ['field_carroll_id', [$person_selector => ['value' => 0]]],
+      ['field_public_email', [$person_selector => ['value' => 0]]],
+      ['field_public_telephone', [$person_selector => ['value' => 0]]],
+      ['field_employee_webform', [$person_selector => ['value' => 0]]],
+
+      ['field_student_or_alumni', [$person_selector => ['value' => 1]]],
+      ['field_academic_program', [$person_selector => ['value' => 1]]],
+      ['field_graduating_class', [$person_selector => ['value' => 1]]],
+      ['field_affiliation', [
+        $person_selector => ['value' => 1],
+        'and',
+        $student_selector => ['value' => 1]
+      ]],
+
+      // ['field_education', [$person_selector => [['value' => 0], 'or', ['value' => 1]]]],
+      // ['field_graduating_class', [$person_selector => [['value' => 0], 'or', ['value' => 1]]]],
+    ];
+
+    foreach ($visible_mapper as $vm) {
+      $form[$vm[0]]['#states'] = [
+        'visible' => $vm[1],
+      ];
+    }
+
+    $graduateDefault = new \Drupal\Core\Datetime\DrupalDateTime(date('Y') . '-12-31');
+    $form['field_graduating_class']['widget'][0]['value']['#default_value'] = $graduateDefault;
+
+  } elseif (preg_match('/node_page_/', $form_id)) {
+
+    $is_landing_selector = '[name="field_is_landing[value]"]';
+    $visible_mapper = [
+      ['field_intro', [$is_landing_selector => ['checked' => true]]],
+    ];
+
+    foreach ($visible_mapper as $vm) {
+      $form[$vm[0]]['#states'] = [
+        'visible' => $vm[1],
+      ];
+    }
+  } elseif (preg_match('/node_event_/', $form_id)) {
+
+    $is_on_campus = '[name="field_on_campus[value]"]';
+    $visible_mapper = [
+      ['field_campus_venues', [$is_on_campus => ['checked' => true]]],
+      ['field_room', [$is_on_campus => ['checked' => true]]],
+      ['field_location', [$is_on_campus => ['checked' => false]]],
+    ];
+
+    foreach ($visible_mapper as $vm) {
+      $form[$vm[0]]['#states'] = [
+        'visible' => $vm[1],
+      ];
+    }
+  }
+}
+
+/**
+ * Return node type name of current page.
+ *
+ * Identical with carroll_get_page_id() function defined in carroll.theme.
+ */
+function auslee_module_get_node_type_id () {
+
+  $namedId = '';
+
+  $routeMatched = \Drupal::routeMatch();
+
+  $node = $routeMatched->getParameter('node');
+  if ($node instanceof \Drupal\node\Entity\Node) {
+    $type = $node->getType();
+    $namedId = $type;
+  }
+
+  if (!$namedId) {
+    $nodeType = $routeMatched->getParameter('node_type');
+    if ($nodeType) $namedId = $nodeType->get('type');
+  }
+
+  if (!$namedId) {
+    $routeName = $routeMatched->getRouteName();
+    $namedId = array_pop(explode('.', $routeName));
+  }
+
+  return $namedId;
+
+}
+
+/**
+ * Get parent field name of the paragraph element.
+ */
+function auslee_module_get_form_parent_field_name ($element) {
+  if (isset($element['subform']['#parents'])) {
+    $len = count($element['subform']['#parents']);
+    $pos = $len - 3;
+
+    return ($pos < 0) ? '' : $element['subform']['#parents'][$pos];
+  }
+  return '';
+}
+
+/**
+ * Get paragraph element selector, which can be used for dynamic form altering logic.
+ */
+function auslee_module_get_form_element_selector ($element, $dependee_field_name, $type = '') {
+
+  $parentNamePart = '';
+
+  if (isset($element['subform']['#parents'])) {
+    $parentsArray = $element['subform']['#parents'];
+    $parentNamePart = array_shift($parentsArray) . '[' . implode('][', $parentsArray) . ']';
+  }
+
+  $selector = $parentNamePart . '[' . $dependee_field_name . ']';
+
+  if ($type == 'checkbox') {
+    $selector .= '[value]';
+  }
+
+  $selector = '[name="' . $selector . '"]';
+
+  return $selector;
+}
+
+/**
+ * Field visibility toggling in paragraph for form alter.
+ */
+function auslee_module_form_toggling_visibility (&$element, $dependee_field_name, $mapper, $is_visible = true) {
+  $key = $is_visible ? 'visible' : 'invisible';
+  $selector = auslee_module_get_form_element_selector($element, $dependee_field_name);
+  foreach ($mapper AS $k => $v) {
+    $element['subform'][$k]['#states'] = [
+      $key => [
+        $selector => ['value' => $v],
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_entity_presave.
+ */
+function auslee_module_entity_presave (Drupal\Core\Entity\EntityInterface $entity)   {
+
+  if ($entity instanceof \Drupal\node\NodeInterface) {
+    $type = $entity->getType();
+    if ($type == '') {
+      //
+    }
+  }
+}
+
+
+/**
+ * Load entities( or entity builders) by condition.
+ */
+function auslee_module_load_entities($conditions = [], $sorts = [], $range = false, $get_builder = false, $builder_opts = ['node', ['default']]) {
+  $data = [];
+
+  $query = \Drupal::entityQuery('node');
+  foreach ($conditions as $cond) {
+    $query = $query->condition(...$cond);
+  }
+
+  foreach ($sorts as $sort) {
+    $query = $query->sort(...$sort);
+  }
+
+  if (is_array($range) && count($range) == 2) $query = $query->range($range[0], $range[1]);
+
+  $result = $query->execute();
+  $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($result);
+
+  $entity_type = 'node';
+  $view_mode = 'default';
+  if (isset($builder_opts[0])) $entity_type = $builder_opts[0];
+  $node_ind = 0;
+  foreach ($nodes as $nodeId => $node) {
+    if ($get_builder) {
+      if (isset($builder_opts[1][$node_ind])) $view_mode = $builder_opts[1][$node_ind];
+      $builder = \Drupal::entityTypeManager()->getViewBuilder($entity_type);
+      $build = $builder->view($node, $view_mode);
+      $data[] = $build;
+    } else {
+      $data = $node;
+    }
+
+    $node_ind++;
+  }
+
+  return $data;
+}
+
+/**
+ * Return clean & safe alias for given text, using pathauto.alias_clearn function.
+ */
+function auslee_module_alias_cleaner($label) {
+  return \Drupal::service('pathauto.alias_cleaner')->cleanString($label);
+}
+
+/**
+ * Get redirect url if available.
+ *
+ * @return array|boolean
+ */
+function auslee_module_get_redirect() {
+  $redirect = false;
+
+  $routeMatched = \Drupal::routeMatch();
+  if ($routeMatched) {
+    $rname = $routeMatched->getRouteName();
+    if ($rname == 'entity.taxonomy_term.canonical') {
+      $term = $routeMatched->getParameter('taxonomy_term');
+      if ($term->bundle() == 'resource_topics') {
+        //
+        $redirect = '\new-redirect-path';
+        if ($redirect) {
+          $redirect = [
+            'route' => $rname,
+            'url' => '/' . $redirect,
+            'status' => 302,
+            'type' => 'term',
+            'node' => $term,
+          ];
+        }
+      }
+    }
+  }
+
+  return $redirect;
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ */
+function auslee_module_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
+  $vp = auslee_module_get_view_field_parent_paragraph($view);
+  if ($vp) {
+    $variables['view_footer_links'] = $vp->field_ip_views_embed_link->view();
+  }
+}
+
+/**
+ * Find parent paragraph of the view if ever have.
+ */
+function auslee_module_get_view_field_parent_paragraph($view, $field = 'field_widgets', $candidats = [['ip_views_embed', 'field_ip_views_embed_view']]) {
+  // Get current node.
+  $node = \Drupal::routeMatch()->getParameter('node');
+
+  $uuid = $view->storage->uuid();
+  $vpar = NULL;
+  foreach ($node->{$field} as $p) {
+    $pe = $p->entity;
+    $p_type = $pe->getType();
+
+    foreach ($candidats as $candidate) {
+
+      if ($p_type == $candidate[0]) {
+        $pv = $pe->{$candidate[1]};
+        if ($pv && $pv->first()) {
+          if ($uuid == $pv->first()->entity->uuid()) {
+            $vpar = $pe;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!is_null($vpar)) {
+      break;
+    }
+  }
+
+  return $vpar;
+}
+
+

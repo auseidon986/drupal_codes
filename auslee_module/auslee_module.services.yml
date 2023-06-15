@@ -1,11 +1,22 @@
 services:
   # Next / Previous links on selected node pages. class: namespace of your extension
-  custom.prevnextnode_extension:
-    class: Drupal\jhu_apl_base\TwigExtension\PrevNextNode
+  auslee_module.prevnextnode_extension:
+    class: Drupal\auslee_module\TwigExtension\PrevNextNode
     arguments: ['@entity_type.manager', '@language_manager']
     tags:
       - { name: twig.extension }
-  custom.xtras_extension:
-    class: Drupal\jhu_apl_base\TwigExtension\Xtras
+  auslee_module.xtras_extension:
+    class: Drupal\auslee_module\TwigExtension\Xtras
     tags:
       - { name: twig.extension }
+  auslee_module.twigfilters_extension:
+    class: Drupal\auslee_module\TwigExtension\CustomTwigFilters
+    arguments: ['@renderer']
+    tags:
+      - { name: twig.extension }
+  resource_redirect_events_subscriber:
+    # Event subscriber class that will listen for the events.
+    class: '\Drupal\auslee_module\EventSubscriber\ResourceRedirectSubscriber'
+    # Tagged as an event_subscriber to register this subscriber with the event_dispatch service.
+    tags:
+      - { name: 'event_subscriber' }

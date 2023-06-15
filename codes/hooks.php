@@ -1,3 +1,4 @@
+<?php
 
 function ume_base_link_alter(&$variables) {
 
@@ -25,5 +26,26 @@ function ume_base_link_alter(&$variables) {
       }
     }
   } catch (Exception $e) {}
+
+}
+
+function ip_link_block_with_view_preprocess_paragraph__ip_link_block_with_view(&$variables) {
+
+  return;
+
+  $entity = $variables['elements']['#paragraph'];
+  $displayMode = $entity->field_ip_lbv_listing_type->value;
+
+  $viewEntity = $entity->field_ip_lbv_view_block->entity;
+
+  if ($viewEntity) {
+    $viewId = $viewEntity->id();
+
+    if ($viewId == 'view_jhu_apl_aoi_listing') {
+      // Do something.
+    }
+
+    $variables['_view_mode'] = 'fancy';
+  }
 
 }

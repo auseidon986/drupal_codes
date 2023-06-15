@@ -23,7 +23,7 @@ class Xtras extends AbstractExtension {
    * Gets a unique identifier for this Twig extension.
    */
   public function getName() {
-    return 'custom.xtras_extension';
+    return 'auslee_module.xtras_extension';
   }
 
   /**

@@ -1,0 +1,31 @@
+
+{% set _start_date = node.field_event_date.start_date|date('U')|format_date('custom', 'M j') %}
+{% set _start_date_array = _start_date|split(' ') %}
+{% set _start_time = node.field_event_date.start_date|date('U')|format_date('custom', 'g:ia') %}
+
+{% set _end_date = node.field_event_date.end_date|date('U')|format_date('custom', 'M j') %}
+{% set _end_time = node.field_event_date.end_date|date('U')|format_date('custom', 'g:ia') %}
+
+
+<img src="{{ file_url(_card.image['#media'].field_media_image.entity.uri.value | image_style('optimized')) }}" alt="{{ _card.image['#media'].field_media_image.alt }}">
+
+
+
+
+{% set _textblock_p = content.field_ip_featured_block_content.0['#paragraph'] %}
+
+<h3 class="side-card-statistic__title">{{ _textblock_p.field_ip_text_block_title.0.value|raw }}</h3>
+
+{{ _textblock_p.field_ip_text_block_text.0.value|raw }}
+
+{% for link in _textblock_p.field_ip_text_block_links %}
+  {% set _url = link.getUrl().toString() %}
+  {% set _link = link.value %}
+  {% set _target = _link.options.attributes.target %}
+  <a href="{{ _url }}" {% if _target|length %} target="{{ _target }}" {% endif %}>
+      {{ _link.title }}
+      <svg aria-hidden="true" width="14" height="6">
+          <use xlink:href="#icon-link-arrow"></use>
+      </svg>
+  </a>
+{% endfor %}

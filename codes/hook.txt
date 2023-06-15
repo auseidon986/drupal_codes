@@ -1,0 +1,47 @@
+ust for simplicity sake if you want to create and use a custom hook in drupal 8 for other developers to use
+
+first to help others define the use of your hook in mymodule.api.php file this hook can act on anything required.
+
+example:
+
+ // my hook
+ function hook_mymodule_alter_something(array &$data) {
+   // here others will make a module that will call this to alter "$data"
+ }
+then when needed in your module.
+
+ \Drupal::moduleHandler()->invokeAll('mymodule_alter_something', [&$data]);
+then the other developer can then make use of this by calling
+
+function MYOTHERMODULE_mymodule_alter_something($data) {
+}
+
+
+
+=====================================================================
+
+
+This section resides in a controller in the parent module:
+
+$plugin_items = [];
+// Call modules that implement the hook, and let them add items.
+\Drupal::moduleHandler()->alter('flot_examples_toc', $plugin_items);
+if (count($plugin_items > 0)) {
+  $output['plugins'] = [
+    '#title' => 'Plugins',
+    '#theme' => 'item_list',
+    '#items' => $plugin_items,
+  ];
+}
+And this resides in the child [module].module file.
+
+use Drupal\Core\Url;
+
+function mymodule_flot_examples_toc_alter(&$item_list) {
+  $options = [
+    ':one' => Url::fromRoute('flot_spider_examples.example')->toString(),
+  ];
+  $item_list[] = t('<a href=":one">Spider Chart</a> (with spider plugin)', $options);
+}
+The parent creates an array and passes it to the children by reference. They can alter the array by adding elements to it. The parent then adds it to the render array.
+

@@ -1,0 +1,7 @@
+name: UMD Architecture General
+type: module
+description: 'Bunch of custom functions that use module hooks.'
+core_version_requirement: ^8 || ^9 || ^10
+package: idfive__umd_architecture
+dependencies:
+  - drupal:node

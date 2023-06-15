@@ -54,7 +54,7 @@ class PrevNextNode extends AbstractExtension {
    * Gets a unique identifier for this Twig extension.
    */
   public function getName() {
-    return 'custom.prevnextnode_extension';
+    return 'auslee_module.prevnextnode_extension';
   }
 
   /**
