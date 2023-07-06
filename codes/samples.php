@@ -247,3 +247,47 @@ function collegetown_base_views_pre_view($view, $display_id, array &$args) {
       $user->save();
     }
   }
+
+/// FILE related
+
+
+  try {
+    $response = $this->httpClient->request('GET', $url, [
+      RequestOptions::TIMEOUT => 15,
+    ]);
+  }
+  catch (TransferException $e) {
+    \Drupal::logger('media_entity_remote_image')->error($e->getMessage() . "<pre>{$e->getTraceAsString()}</pre>");
+    throw new RemoteImageException('Could not retrieve the remote image resource.', $url, [], $e);
+  }
+
+  [$format] = $response->getHeader('Content-Type');
+  $content = (string) $response->getBody();
+  $thumbnail = NULL;
+
+  if (strpos($format, 'image/') === 0) {
+    //
+
+    try {
+      $img_info = pathinfo($url);
+      $time = time();
+      $filename = "{$img_info['filename']}-$time.{$img_info['extension']}";
+
+      $private_path = PrivateStream::basePath() . '/remote_image_thumbnails';
+      \Drupal::service('file_system')->prepareDirectory($private_path, FileSystemInterface:: CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+
+      $file = \Drupal::service('file.repository')->writeData($content, 'private://remote_image_thumbnails/' . $filename, FileSystemInterface::EXISTS_REPLACE);
+      $file->setTemporary();
+      $file->save();
+      $thumbnail = $file->getFileUri();
+      dump($thumbnail);
+      dump(\Drupal::service('file_url_generator')->generateAbsoluteString($thumbnail));
+    }
+    catch (\Throwable $e) {
+      \Drupal::logger('media_entity_remote_image')->error($e->getMessage() . "<pre>{$e->getTraceAsString()}</pre>");
+      \Drupal::messenger()->addError('Could not generate thumbnail. See the logs for more information.');
+    }
+
+  } else {
+    throw new RemoteImageException('The url is not returning an image.', $url);
+  }
