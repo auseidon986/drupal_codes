@@ -49,3 +49,11 @@ function ip_link_block_with_view_preprocess_paragraph__ip_link_block_with_view(&
   }
 
 }
+
+/**
+ * Breadcrumb hook
+ */
+function collegetown_preprocess_breadcrumb(&$variables){
+  // Disable cache
+  $variables['#cache']['contexts'][] = 'url';
+}

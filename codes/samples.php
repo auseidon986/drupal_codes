@@ -132,6 +132,43 @@ function collegetown_base_views_pre_execute($view) {
   return $view;
 }
 
+
+/**
+ * Implements hook_views_pre_execute().
+ *
+ * Modify query to sort courses so that recent upcoming courses will come first.
+ */
+function umd_global_base_views_query_alter(\Drupal\views\ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  if ($view->id() == 'umd_global_courses') {
+    return;
+    array_unshift($query->orderby, [
+      "field" => "_is_upcoming",
+      "direction" => "DESC",
+    ]);
+  }
+}
+
+/**
+ * Implements hook_views_pre_execute().
+ *
+ * Modify query to add expression to check if its upcoming courses or not.
+ */
+function umd_global_base_views_pre_execute($view) {
+  $viewId = $view->storage->id();
+
+  if ($viewId == 'umd_global_courses') {
+    $today = date('Y-m-d');
+
+    $query = &$view->build_info['query'];
+    $query->leftJoin('node__field_course_end_date', 'ed', '(node_field_data.nid = ed.entity_id) AND (node_field_data.type = ed.bundle)');
+    $query->addExpression('IF("ed"."field_course_end_date_value" < \'' . $today . '\' , 0, 1)', '_is_upcoming');
+  }
+
+  return $view;
+}
+
+
+
 /**
  * Implements hook_views_pre_view().
  */
@@ -291,3 +328,55 @@ function collegetown_base_views_pre_view($view, $display_id, array &$args) {
   } else {
     throw new RemoteImageException('The url is not returning an image.', $url);
   }
+
+
+
+  // There is a case that users place cross link in main navigation, which breaks sub navigation displaying logic.
+  // We need to check parent page just based on breadcrumb, rather than menu structure.
+  //
+
+  $current_path = \Drupal::service('path.current')->getPath();
+  $alias = \Drupal::service('path_alias.manager')->getAliasByPath($current_path);
+  $alias_array = explode('/', $alias);
+  if (count($alias_array) > 1) {
+    //
+    $parent_alias_array = [];
+    for ($i=0; $i<min(count($alias_array), max(0, $showing_depth-1)) + 1; $i++) {
+      $parent_alias_array[] = $alias_array[$i];
+    }
+    $parent_alias = implode('/', $parent_alias_array);
+    // Get parent node actual path by alias
+    $parent_path = \Drupal::service('path_alias.manager')->getPathByAlias($parent_alias);
+    $params = FALSE;
+    try {
+      $params = Url::fromUri("internal:" . $parent_path)->getRouteParameters();
+    } catch (Exception $e) {
+      // Failed to find parent node
+    }
+    if ($params) {
+      // Get parent node from the parameter
+      $entity_type = key($params);
+      $parent_node = \Drupal::entityTypeManager()->getStorage($entity_type)->load($params[$entity_type]);
+      if ($parent_node && $parent_node instanceof \Drupal\node\NodeInterface) {
+        // If parent node is existing, then track the menu trails.
+        $parent_node_id = $parent_node->id();
+        $menu_link = $menu_link_manager->loadLinksByRoute('entity.node.canonical', array('node' => $parent_node_id));
+        if (is_array($menu_link) && count($menu_link)) {
+          $link_keys = array_keys($menu_link);
+          if (isset($link_keys[0])) {
+            $parent_link_id = $link_keys[0];
+          } else {
+            // Not available, so ...
+            $parent_link_id = 'NOTHING';
+          }
+        }
+      }
+    }
+  }
+
+
+// Clear View Cache
+$view = \Drupal\views\Views::getView('umd_global_courses');
+$view->storage->invalidateCaches();
+
+
