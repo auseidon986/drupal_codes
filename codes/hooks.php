@@ -57,3 +57,41 @@ function collegetown_preprocess_breadcrumb(&$variables){
   // Disable cache
   $variables['#cache']['contexts'][] = 'url';
 }
+
+
+/**
+ * Implements hook_theme_suggestions_alter().
+ */
+function idfive_calendar_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+  if ($hook == 'select') {
+    if (isset($variables['element']['#field_name'])) {
+      $suggestions[] = 'select__' . str_replace('-', '_', $variables['element']['#field_name']);
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function idfive_calendar_theme() {
+  return [
+    'select__field_ic_taxonomy' => [
+      'base hook' => 'select',
+    ],
+  ];
+}
+
+
+function umd_global_preprocess_breadcrumb(&$variables) {
+  // Cache control
+  $variables['#cache']['contexts'][] = 'url.path';
+
+  /*
+  $request = \Drupal::request();
+  $route_match = \Drupal::routeMatch();
+  if (($node = $route_match->getParameter('node')) && $variables['breadcrumb']) {
+    // remove added title from umd_terp base theme. Let menu_breadcrumb module handle it.
+    array_pop($variables['breadcrumb']);
+  }
+  */
+}
