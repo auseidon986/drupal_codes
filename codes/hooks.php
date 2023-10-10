@@ -75,6 +75,12 @@ function idfive_calendar_theme_suggestions_alter(array &$suggestions, array $var
  */
 function idfive_calendar_theme() {
   return [
+    'calendar_date' => [
+      'render element' => 'elements',
+    ],
+    'node__idfive_event' => [
+      'base hook' => 'node',
+    ],
     'select__field_ic_taxonomy' => [
       'base hook' => 'select',
     ],
@@ -94,4 +100,33 @@ function umd_global_preprocess_breadcrumb(&$variables) {
     array_pop($variables['breadcrumb']);
   }
   */
+}
+
+
+
+/**
+ * Fix following error.
+ *
+ * Mismatched entity and/or field definitions.
+ * The paragraph.field_ut_view_view field needs to be updated.
+ */
+function ut_view_update_9001() {
+  //
+  // Flush all caches to be safe.
+  drupal_flush_all_caches();
+
+  //
+  // Get correct storage configuration
+  $field_storage_config = \Drupal\field\Entity\FieldStorageConfig ::load('paragraph.field_ut_view_view');
+
+  //
+  // Update installed storage configuration with the correct one
+  $installedStorageSchema = \Drupal::keyValue('entity.storage_schema.sql');
+  $installedStorageSchema->set('paragraph.field_schema_data.field_ut_view_view', $field_storage_config->getSchema());
+
+  //
+  // Refresh field storage definition to validate
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $field_storage_definition = $manager->getFieldStorageDefinition('field_ut_view_view', 'paragraph');
+  $manager->updateFieldStorageDefinition($field_storage_definition);
 }
