@@ -1,0 +1,123 @@
+
+{% if header %}
+  {{ header }}
+{% endif %}
+
+<div class="filter-providers">
+  <h3>Filter Providers</h3>
+  <div class="filters">
+      <form class="ctools-auto-submit-full-form ctools-auto-submit-processed" action="/provider-search" method="get" id="views-exposed-form-provider-search-page-name" accept-charset="UTF-8">
+          <div class="block-mefibs">
+            <h4>By Name:</h4>
+          </div>
+          <table style="width:100%">
+          <th>
+            <td  style="width:50%">{{exposed.title|without('#title')}}</td>
+            <td  style="width:50%">{{exposed.field_last_name_value|without('#title')}}</td>
+          </th>
+          </table>
+          <div class="block-mefibs contextual-links-region">
+            <h4>By Services:</h4>
+              {{exposed.field_specialty_tid|without('#title')}}
+            </div>
+          <div class="block block-mefibs contextual-links-region">
+            <h4>By Location:</h4>
+            {{exposed.field_location_tid|without('#title')}}
+          </div>
+          <div class="block block-mefibs contextual-links-region">
+            <h4>By Language:</h4>
+            {{exposed.field_languages_tid|without('#title')}}
+          </div>
+          <div class="block block-mefibs contextual-links-region">
+            <h4>Accept Online Appointments:</h4>
+            {{exposed.field_appointment_url_uri|without('#title')}}
+          </div>
+          <div class="block-mefibs">
+            <input class="form-submit" type="submit" id="edit-mefibs-form-name-submit-provider-search" value="Submit">
+          </div>
+      </form>
+  </div>
+</div>
+
+<div class="filter-alphabetically">
+  <h4 class="hidden-all">Filter alphabetically</h4>
+  <ul>
+    <li><a href="/provider-search/A">A</a></li>
+    <li><a href="/provider-search/B">B</a></li>
+    <li><a href="/provider-search/C">C</a></li>
+    <li><a href="/provider-search/D">D</a></li>
+    <li><a href="/provider-search/E">E</a></li>
+    <li><a href="/provider-search/F">F</a></li>
+    <li><a href="/provider-search/G">G</a></li>
+    <li><a href="/provider-search/H">H</a></li>
+    <li><a href="/provider-search/I">I</a></li>
+    <li><a href="/provider-search/J">J</a></li>
+    <li><a href="/provider-search/K">K</a></li>
+    <li><a href="/provider-search/L">L</a></li>
+    <li><a href="/provider-search/M">M</a></li>
+    <li><a href="/provider-search/N">N</a></li>
+    <li><a href="/provider-search/O">O</a></li>
+    <li><a href="/provider-search/P">P</a></li>
+    <li><a href="/provider-search/Q">Q</a></li>
+    <li><a href="/provider-search/R">R</a></li>
+    <li><a href="/provider-search/S">S</a></li>
+    <li><a href="/provider-search/T">T</a></li>
+    <li><a href="/provider-search/U">U</a></li>
+    <li><a href="/provider-search/V">V</a></li>
+    <li><a href="/provider-search/W">W</a></li>
+    <li><a href="/provider-search/X">X</a></li>
+    <li><a href="/provider-search/Y">Y</a></li>
+    <li><a href="/provider-search/Z">Z</a></li>
+  </ul>
+</div>
+{% set key = 0 %}
+{% for row in rows[0]['#rows'] %}
+
+{%
+  set row_classes = [
+  default_row_class ? 'views-row',
+  loop.first ? 'views-row-first',
+  loop.last ? 'views-row-last',
+  'masonry'
+  ]
+%}
+<div{{ row.attributes.addClass(row_classes) }}>
+<div class="provider">
+  <div class="col-huge-4">
+    {{ view.style_plugin.getField(key,'field_provider_image') }}
+  </div>
+  <div class="col-huge-6">
+    <div class="doctor-name">
+      <h3> {{ view.style_plugin.getField(key,'title_1') }}  {{ view.style_plugin.getField(key,'field_last_name') }}</h3>
+      {{ view.style_plugin.getField(key,'field_doctor_title') }}
+    </div>
+    <dl>
+      <dt>Services:</dt>
+      <dd>{{ view.style_plugin.getField(key,'field_specialty')|replace({ '<p>': '', '</p>': ''}) }}</dd>
+      <dt>Areas of Interest:</dt>
+      <dd>{{ view.style_plugin.getField(key,'field_provider_services')|replace({ '<p>': '', '</p>': ''}) }}</dd>
+      <dt>Location:</dt>
+      <dd>
+        {{ view.style_plugin.getField(key,'field_location')|replace({ '<p>': '', '</p>': ''}) }}
+        {% if view.style_plugin.getField(key,'field_appointment_url') %}
+        <p><strong><em>Now using online appointment scheduling.</em></strong>
+        <p>
+          {% endif %}
+      </dd>
+    </dl>
+  </div>
+  <div class="provider-info">
+
+    {% if view.style_plugin.getField(key,'field_appointment_url') is not empty  %}
+      {% set url_to = view.style_plugin.getField(key,'field_appointment_url') %}
+      <a href="{{ url_to }}" class="appointment" target="_blank">Make Appointment Online <span class="hidden-all"> with {{ view.style_plugin.getField(key,'title_1') }}  {{ view.style_plugin.getField(key,'field_last_name') }}</span></a>
+    {% else %}
+      <a href="/appointment-scheduling/" class="appointment">Call for Appointment <span class="hidden-all"> with </span></a>
+    {% endif %}
+    {{ view.style_plugin.getField(key,'field_contact_url') }}
+  </div>
+</div>
+</div>
+{% set key = ( key | default(0) ) + 1 %}
+{% endfor %}
+{{ pager }}

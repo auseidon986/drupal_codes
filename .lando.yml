@@ -1,0 +1,20 @@
+name: jhuapl
+recipe: acquia
+config:
+  acli_version: latest
+  ah_application_uuid: f601c299-bf7d-4283-acc8-4b8f1e6ffb9c
+  ah_site_group: jhuapl
+  php: '8.1'
+  xdebug: false
+  inbox: false
+  cache: false
+  build:
+    run_scripts: false
+proxy:
+  appserver:
+    - exweb.jhuapl.lndo.site
+    - space.jhuapl.lndo.site
+services:
+  space:
+    type: mysql:8.0
+    portforward: 33080

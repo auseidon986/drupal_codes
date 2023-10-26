@@ -1,0 +1,14 @@
+name: one-house
+recipe: pantheon
+config:
+  framework: drupal8
+  site: one-house
+  id: 388727fc-07fa-453f-b205-72a067001d73
+proxy:
+  mailhog:
+    - mail.MY_SITE.lndo.site
+services:
+  mailhog:
+    type: mailhog
+    hogfrom:
+      - appserver

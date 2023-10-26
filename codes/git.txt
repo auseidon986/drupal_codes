@@ -2,6 +2,9 @@ drupalcs
 drupalcbf
 drupalcsp
 
+terminus auth:login --machine-token=TOKEN
+terminus aliases
+terminus aliases --all
 
 git config --global core.autocrlf true
 
@@ -17,7 +20,11 @@ lando drush theme:enable stable9
 lando drush user-create austin --mail="austin.lee@idfive.com" --password="1111"
 lando drush user-add-role "administrator" austin
 
-lando terminus aliases --all
-
 lando drush @pantheon.baltimore-collegetown.dev status
 lando drush @pantheon.sph-umd.dev status
+
+lando drush -l http://space.jhuapl.lndo.site cr
+
+
+docker image prune -a -f
+docker volume prune
